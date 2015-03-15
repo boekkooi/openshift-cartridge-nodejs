@@ -1,0 +1,21 @@
+Name: nodejs
+Cartridge-Short-Name: NODEJS
+Display-Name: NodeJS
+License: MIT
+Version: "0.12.0"
+Versions: [ "0.12.0" ]
+Website: https://github.com/boekkooi/openshift-cartridge-nodejs
+Cartridge-Version: 0.0.1
+Cartridge-Vendor: boekkooi
+Categories:
+  - embedded
+  - plugin
+Provides:
+  - nodejs
+Scaling:
+  Min: 1
+  Max: -1
+Group-Overrides:
+  - components:
+    - nodejs
+    - web_framework

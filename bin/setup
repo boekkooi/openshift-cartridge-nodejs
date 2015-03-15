@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+
+CURRENT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source ${CURRENT_DIR}/setup_utils
+
+case "$1" in
+  -v|--version)
+    version="$2"
+esac
+
+# Resolve version
+NODEJS_VERSION=0.12.0
+if [ ! -z "${OPENSHIFT_NODEJS_VERSION}" ]; then
+    NODEJS_VERSION="${OPENSHIFT_NODEJS_VERSION}"
+else
+    NODEJS_VERSION="${version}"
+fi
+
+NODEJS_DIR=${OPENSHIFT_NODEJS_DIR}/usr/node-v${NODEJS_VERSION}
+
+# Create dirs
+for dir in env usr; do
+    mkdir -p "${OPENSHIFT_NODEJS_DIR}/${dir}"
+done
+
+# Set version env variables
+echo "${NODEJS_VERSION}" > env/OPENSHIFT_NODEJS_VERSION
+echo "${NODEJS_DIR}" > env/OPENSHIFT_NODEJS_VERSION_DIR
+echo "${NODEJS_DIR}/bin" > env/OPENSHIFT_NODEJS_PATH_ELEMENT
+
+# Install
+install_nodejs
+
+# npm keeps per-user config in ~/.npmrc
+npm=${NODEJS_DIR}/bin/npm
+
+# Create files/directories, change ownership and SELinux file security context.
+touch "${OPENSHIFT_HOMEDIR}"/.npmrc
+mkdir -p ${OPENSHIFT_NODEJS_DIR}/.npm
+chown `id -u ${OPENSHIFT_GEAR_UUID}` -R "${OPENSHIFT_HOMEDIR}"/.npmrc
+
+${npm} config set tmp ${OPENSHIFT_TMP_DIR}
+${npm} config set cache ${OPENSHIFT_NODEJS_DIR}/.npm
